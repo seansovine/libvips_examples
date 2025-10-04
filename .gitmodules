@@ -1,3 +1,6 @@
 [submodule "libvips"]
-	path = libvips
+	path = thirdparty/libvips
 	url = git@github.com:libvips/libvips.git
+[submodule "spdlog"]
+	path = thirdparty/spdlog
+	url = git@github.com:gabime/spdlog.git

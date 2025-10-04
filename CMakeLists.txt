@@ -11,7 +11,9 @@ set(CXX_STANDARD 20)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CMAKE_SOURCE_DIR}/libvips/build/meson-private")
+### Dependencies added with pkg-config.
+
+set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/meson-private")
 find_package(PkgConfig REQUIRED)
 
 # pkg_search_module(GLIB REQUIRED glib-2.0)
@@ -26,12 +28,20 @@ pkg_search_module(VIPS REQUIRED vips)
 include_directories(${VIPS_INCLUDE_DIRS})
 link_directories(${VIPS_LIBRARY_DIRS})
 
-message(STATUS "vips-cpp include paths: ${VIPS_INCLUDE_DIRS}")
+message(DEBUG "vips-cpp include paths: ${VIPS_INCLUDE_DIRS}")
+
+### Other third-party libraries.
+
+# spdlog for logging.
+set(SPDLOG_BUILD_SHARED ON)
+add_subdirectory(thirdparty/spdlog)
+
+###
 
 # Source files for vips-cpp library.
 file(
 	GLOB LIBVIPS_CPP_SOURCES
-	"${CMAKE_SOURCE_DIR}/libvips/build/libvips/include/version.h"
+	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include/version.h"
 	"${CMAKE_SOURCE_DIR}/libvips-cpp/*.cpp"
 	"${CMAKE_SOURCE_DIR}/libvips-cpp/include/*."
 	"${CMAKE_SOURCE_DIR}/libvips-cpp/include/vips/vips8"
@@ -40,14 +50,14 @@ file(
 # Build shared library from vips cpp bindings.
 add_library(
 	libvips-cpp
-	SHARED
+		SHARED
 	${LIBVIPS_CPP_SOURCES}
 )
 target_include_directories(
 	libvips-cpp
 		PUBLIC
-	"${CMAKE_SOURCE_DIR}/libvips/libvips/include"
-	"${CMAKE_SOURCE_DIR}/libvips/build/libvips/include"
+	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/libvips/include"
+	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include"
 	"${CMAKE_SOURCE_DIR}/libvips-cpp/include"
 	"${CMAKE_SOURCE_DIR}/libvips-cpp/generated"
 	"${VIPS_INCLUDE_DIRS}"
@@ -55,7 +65,8 @@ target_include_directories(
 target_link_libraries(
 	libvips-cpp
 		PUBLIC
-	"${CMAKE_SOURCE_DIR}/libvips/build/libvips/libvips.so"
+	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/libvips.so"
+	spdlog
 )
 
 # Program to test the vips C API.

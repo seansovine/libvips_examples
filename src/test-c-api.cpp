@@ -1,64 +1,74 @@
-#include <glib-object.h>
+/**
+ * A basic test of the libvips C API.
+ * Modified from the use-vips-func.c example file.
+ */
+
+#include <spdlog/spdlog.h>
 #include <vips/vips.h>
 
 #include <string>
-// using namespace vips;
+
+enum class Operation {
+    Gamma,
+    Invert,
+    None
+};
+
+constexpr Operation getTestOp() {
+    constexpr Operation testOp = Operation::Gamma;
+    return testOp;
+}
 
 int main(int argc, char **argv) {
     std::string imageFile = "images/pexels-stijn-dijkstra-1306815-29988776.jpg";
+    std::string outptFile = "images/test_out.jpg";
 
-    char filename[VIPS_PATH_MAX];
-    char option_string[VIPS_PATH_MAX];
-    vips__filename_split8(imageFile.c_str(), filename, option_string);
+    VipsImage *in;
+    double mean;
+    VipsImage *out;
 
-    if (!vips_existsf("%s", filename)) {
-        vips_error("VipsForeignLoad", "file \"%s\" does not exist", filename);
-        return -1;
+    // Must initialize vips framework.
+    if (VIPS_INIT(argv[0])) {
+        vips_error_exit("Failed to initialize vips.", NULL);
     }
-    if (vips_isdirf("%s", filename)) {
-        vips_error("VipsForeignLoad", "\"%s\" is a directory", filename);
-        return -1;
+    if (!(in = vips_image_new_from_file(imageFile.c_str(), NULL))) {
+        vips_error_exit("Failed to read image file: %s", imageFile.c_str(), NULL);
     }
+    spdlog::info("image width = {:d}", vips_image_get_width(in));
 
-    if (vips_init(argv[0]))
+    if (vips_avg(in, &mean, NULL)) {
         vips_error_exit(NULL);
+    }
+    spdlog::info("mean pixel value = {:g}", mean);
 
-    GType type = g_type_from_name("VipsForeignLoad");
+    int opResult = 0;
+    switch (getTestOp()) {
+        case Operation::Gamma: {
+            constexpr gdouble gamma = 1.55;
+            opResult = vips_gamma(in, &out, gamma, NULL);
+            break;
+        }
 
-    // // vips_error_exit("\"%s\" is not a known file format", filename);
-    const char *operation_name = vips_foreign_find_load(filename);
+        case Operation::Invert: {
+            opResult = vips_invert(in, &out, NULL);
+            break;
+        }
 
-    vips_shutdown();
+        default: {
+            spdlog::debug("Invalid test operation setting. No operation will be performed.");
+            break;
+        }
+    }
+    if (opResult != 0 || out == nullptr) {
+        vips_error_exit("Image operation failed.", NULL);
+    }
+
+    g_object_unref(in);
+    if (vips_image_write_to_file(out, outptFile.c_str(), NULL)) {
+        vips_error_exit("Failed to write image file: %s", outptFile.c_str(), NULL);
+    }
+    g_object_unref(out);
+    spdlog::info("Processed image written to: {}", outptFile);
+
     return 0;
-
-    // VipsImage *in;
-    // double mean;
-    // VipsImage *out;
-
-    // if (!(in = vips_image_new_from_file(imageFile.c_str(), NULL)))
-    //   vips_error_exit(NULL);
-
-    // printf("image width = %d\n", vips_image_get_width(in));
-
-    // if (vips_avg(in, &mean, NULL))
-    //   vips_error_exit(NULL);
-
-    // printf("mean pixel value = %g\n", mean);
-
-    // /* generate photo nexative - replace with other vips_ funcs */
-    // //   if (vips_invert(in, &out, NULL))
-    // //     vips_error_exit(NULL);
-
-    // gdouble gamma = 1.55;
-    // if (vips_gamma(in, &out, gamma, NULL))
-    //   vips_error_exit(NULL);
-
-    // g_object_unref(in);
-
-    // if (vips_image_write_to_file(out, outFile.c_str(), NULL))
-    //   vips_error_exit(NULL);
-
-    // g_object_unref(out);
-
-    // return 0;
 }

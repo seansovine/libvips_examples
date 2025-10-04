@@ -11,5 +11,9 @@ BraceWrapping:
   AfterCaseLabel: false
   AfterEnum: false
   SplitEmptyFunction: false
+InsertBraces: true
 
 PackConstructorInitializers: Never
+
+IndentCaseLabels: true
+IndentCaseBlocks: false
