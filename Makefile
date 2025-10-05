@@ -5,6 +5,7 @@ configure:
 
 .PHONY: build
 
+# Note: This assumes that libvips has already been built. See Notes.md.
 build:
 	@cmake --build ./build/Debug --config Debug --target all "-j `nproc`"
 
