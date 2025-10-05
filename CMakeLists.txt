@@ -11,26 +11,9 @@ set(CXX_STANDARD 20)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-### Dependencies added with pkg-config.
+### Build our own copy of libvips C++ bindings (for now).
 
-set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/meson-private")
-find_package(PkgConfig REQUIRED)
-
-# Covered by gobject, but keeping it around for reference.
-#
-# pkg_search_module(GLIB REQUIRED glib-2.0)
-# include_directories(${GLIB_INCLUDE_DIRS})
-# link_directories(${GLIB_LIBRARY_DIRS})
-
-pkg_search_module(GOBJECT REQUIRED gobject-2.0)
-include_directories(${GOBJECT_INCLUDE_DIRS})
-link_directories(${GOBJECT_LIBRARY_DIRS})
-
-pkg_search_module(VIPS REQUIRED vips)
-include_directories(${VIPS_INCLUDE_DIRS})
-link_directories(${VIPS_LIBRARY_DIRS})
-
-message(DEBUG "vips-cpp include paths: ${VIPS_INCLUDE_DIRS}")
+add_subdirectory(libvips-cpp)
 
 ### Other third-party libraries.
 
@@ -41,41 +24,6 @@ add_subdirectory(thirdparty/spdlog)
 # pybind11.
 set(PYBIND11_FINDPYTHON ON)
 add_subdirectory(thirdparty/pybind11)
-
-# include_directories("${CMAKE_SOURCE_DIR}/thirdparty/pybind11/include")
-
-### Build our local vips-cpp.
-
-# Source files for vips-cpp library.
-file(
-    GLOB LIBVIPS_CPP_SOURCES
-    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include/version.h"
-    "${CMAKE_SOURCE_DIR}/libvips-cpp/*.cpp"
-    "${CMAKE_SOURCE_DIR}/libvips-cpp/include/*."
-    "${CMAKE_SOURCE_DIR}/libvips-cpp/include/vips/vips8"
-)
-
-# Build shared library from vips cpp bindings.
-add_library(
-    vips-cpp
-  SHARED
-    ${LIBVIPS_CPP_SOURCES}
-)
-target_include_directories(
-    vips-cpp
-  PUBLIC
-    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/libvips/include"
-    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include"
-    "${CMAKE_SOURCE_DIR}/libvips-cpp/include"
-    "${CMAKE_SOURCE_DIR}/libvips-cpp/generated"
-    "${VIPS_INCLUDE_DIRS}"
-)
-target_link_libraries(
-    vips-cpp
-  PUBLIC
-    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/libvips.so"
-    spdlog
-)
 
 ### Build API test executables.
 
@@ -100,6 +48,7 @@ target_link_libraries(
 ### pybind11 Python bindings.
 
 pybind11_add_module(vips_py src/vips-py/vips-module.cpp)
+
 target_link_libraries(
     vips_py
   PUBLIC
@@ -108,11 +57,11 @@ target_link_libraries(
     spdlog
 )
 
-# To let the Python module no where to find transitive
-# dependency share libraries that we have built locally.
+# To let the Python module know where to find transitive
+# dependency shared libraries that we have built locally.
 #
-# TODO: Find a better way to do this.
-# At the least, use proper install directories here.
+# TODO: Find a better way to do this. At the least we
+# could use proper install directories here.
 set_target_properties(
     vips_py
     PROPERTIES

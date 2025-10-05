@@ -5,6 +5,9 @@
 Our current build procedure:
 
 ```shell
+# Get thirdparty submodules.
+git submodule update --init --recursive
+
 # We build with bear to generate a compilation database for libvips.
 cd libvips
 bear -- meson setup build --reconfigure -Dcplusplus=true -Ddebug=true

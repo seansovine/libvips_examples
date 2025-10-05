@@ -5,8 +5,8 @@ configure:
 
 .PHONY: build
 
-# Note: This assumes that libvips has already been built. See Notes.md.
 build:
+	@# Note: This assumes that libvips has already been built. See Notes.md.
 	@cmake --build ./build/Debug --config Debug --target all "-j `nproc`"
 
 	@# TODO: Replace this with an "official" process, if one exists.
@@ -14,6 +14,12 @@ build:
 
 clean:
 	rm -rf build/
+
+c_test:
+	build/Debug/test-c-api
+
+cpp_test:
+	build/Debug/test-cpp-api
 
 pybuild:
 	@pip install --force-reinstall .

@@ -15,9 +15,14 @@ function demonstrating that the library code can be called successfully from Pyt
 It can be built and tested with:
 
 ```shell
-# Build the module.
+# First build libvips separately,
+# as described in Notes.md.
+
+# CMake build step.
 make configure
 make build
+
+# Python build step.
 make pybuild
 
 # Test it.
