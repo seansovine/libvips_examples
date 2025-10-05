@@ -1,4 +1,5 @@
 build/
+built-libs/*.so.*
 /compile_commands.json
 .cache/
 images/

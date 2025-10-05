@@ -37,3 +37,21 @@ I copy all the command entries in the `thirdyparty/libvips/compile_commands.json
 and paste them into the `compile_commands.json` file that is symlinked into the
 root directory in the build steps above. This allows clangd to parse the build
 commands from both the main CMake build and the independent libvips build.
+
+## Python module
+
+There is a proof-of-concept Python module for libvips Python bindings using PyBind11,
+defined [here](./src/vips-py/vips-module.cpp). It currently provides a single Python
+function demonstrating that the library code can be called successfully from Python.
+
+It can be built and tested with:
+
+```shell
+# Build the module.
+make configure
+make build
+make pybuild
+
+# Test it.
+python test/vips_py_test.py
+```

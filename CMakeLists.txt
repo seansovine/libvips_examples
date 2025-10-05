@@ -42,37 +42,39 @@ add_subdirectory(thirdparty/spdlog)
 set(PYBIND11_FINDPYTHON ON)
 add_subdirectory(thirdparty/pybind11)
 
+# include_directories("${CMAKE_SOURCE_DIR}/thirdparty/pybind11/include")
+
 ### Build our local vips-cpp.
 
 # Source files for vips-cpp library.
 file(
-	GLOB LIBVIPS_CPP_SOURCES
-	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include/version.h"
-	"${CMAKE_SOURCE_DIR}/libvips-cpp/*.cpp"
-	"${CMAKE_SOURCE_DIR}/libvips-cpp/include/*."
-	"${CMAKE_SOURCE_DIR}/libvips-cpp/include/vips/vips8"
+    GLOB LIBVIPS_CPP_SOURCES
+    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include/version.h"
+    "${CMAKE_SOURCE_DIR}/libvips-cpp/*.cpp"
+    "${CMAKE_SOURCE_DIR}/libvips-cpp/include/*."
+    "${CMAKE_SOURCE_DIR}/libvips-cpp/include/vips/vips8"
 )
 
 # Build shared library from vips cpp bindings.
 add_library(
-	libvips-cpp
-		SHARED
-	${LIBVIPS_CPP_SOURCES}
+    vips-cpp
+  SHARED
+    ${LIBVIPS_CPP_SOURCES}
 )
 target_include_directories(
-	libvips-cpp
-		PUBLIC
-	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/libvips/include"
-	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include"
-	"${CMAKE_SOURCE_DIR}/libvips-cpp/include"
-	"${CMAKE_SOURCE_DIR}/libvips-cpp/generated"
-	"${VIPS_INCLUDE_DIRS}"
+    vips-cpp
+  PUBLIC
+    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/libvips/include"
+    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/include"
+    "${CMAKE_SOURCE_DIR}/libvips-cpp/include"
+    "${CMAKE_SOURCE_DIR}/libvips-cpp/generated"
+    "${VIPS_INCLUDE_DIRS}"
 )
 target_link_libraries(
-	libvips-cpp
-		PUBLIC
-	"${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/libvips.so"
-	spdlog
+    vips-cpp
+  PUBLIC
+    "${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/libvips/libvips.so"
+    spdlog
 )
 
 ### Build API test executables.
@@ -80,21 +82,42 @@ target_link_libraries(
 # Program to test the vips C API.
 add_executable(test-c-api src/test-c-api.cpp)
 target_link_libraries(
-	test-c-api
-		PUBLIC
-	${GOBJECT_LIBRARIES}
-	libvips-cpp
+    test-c-api
+  PUBLIC
+    ${GOBJECT_LIBRARIES}
+    vips-cpp
 )
 
 # Program to test the vips C++ API.
 add_executable(test-cpp-api src/test-cpp-api.cpp)
 target_link_libraries(
-	test-cpp-api
-		PUBLIC
-	${GOBJECT_LIBRARIES}
-	libvips-cpp
+    test-cpp-api
+  PUBLIC
+    ${GOBJECT_LIBRARIES}
+    vips-cpp
 )
 
 ### pybind11 Python bindings.
 
-# TODO.
+pybind11_add_module(vips_py src/vips-py/vips-module.cpp)
+target_link_libraries(
+    vips_py
+  PUBLIC
+    ${GOBJECT_LIBRARIES}
+    vips-cpp
+    spdlog
+)
+
+# To let the Python module no where to find transitive
+# dependency share libraries that we have built locally.
+#
+# TODO: Find a better way to do this.
+# At the least, use proper install directories here.
+set_target_properties(
+    vips_py
+    PROPERTIES
+    INSTALL_RPATH
+    "${CMAKE_SOURCE_DIR}/built-libs"
+)
+
+install(TARGETS vips_py DESTINATION .)

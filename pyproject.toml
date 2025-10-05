@@ -1,0 +1,8 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+# Suggestion to use this backend is here: https://pybind11.readthedocs.io/en/stable/compiling.html
+
+[project]
+name = "vips_py"
+version = "0.1.0"
