@@ -16,6 +16,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CMAKE_SOURCE_DIR}/thirdparty/libvips/build/meson-private")
 find_package(PkgConfig REQUIRED)
 
+# Covered by gobject, but keeping it around for reference.
+#
 # pkg_search_module(GLIB REQUIRED glib-2.0)
 # include_directories(${GLIB_INCLUDE_DIRS})
 # link_directories(${GLIB_LIBRARY_DIRS})
@@ -36,7 +38,11 @@ message(DEBUG "vips-cpp include paths: ${VIPS_INCLUDE_DIRS}")
 set(SPDLOG_BUILD_SHARED ON)
 add_subdirectory(thirdparty/spdlog)
 
-###
+# pybind11.
+set(PYBIND11_FINDPYTHON ON)
+add_subdirectory(thirdparty/pybind11)
+
+### Build our local vips-cpp.
 
 # Source files for vips-cpp library.
 file(
@@ -69,6 +75,8 @@ target_link_libraries(
 	spdlog
 )
 
+### Build API test executables.
+
 # Program to test the vips C API.
 add_executable(test-c-api src/test-c-api.cpp)
 target_link_libraries(
@@ -86,3 +94,7 @@ target_link_libraries(
 	${GOBJECT_LIBRARIES}
 	libvips-cpp
 )
+
+### pybind11 Python bindings.
+
+# TODO.
