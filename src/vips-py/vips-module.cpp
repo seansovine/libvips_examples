@@ -30,8 +30,7 @@ void gamma_transform(const std::string &imageFile, std::string outputFile, doubl
     spdlog::info("Mean pixel value = {:g}", mean);
 
     spdlog::info("Applying gamma transform with exponent = {:g}", exponent);
-    gdouble gExponent = exponent;
-    int opResult = vips_gamma(in, &out, gExponent, NULL);
+    int opResult = vips_gamma(in, &out, "exponent", exponent, NULL);
 
     if (opResult != 0 || out == nullptr) {
         vips_error_exit("Image operation failed.", NULL);

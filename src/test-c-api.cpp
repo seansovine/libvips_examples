@@ -44,8 +44,8 @@ int main(int argc, char **argv) {
     int opResult = 0;
     switch (getTestOp()) {
         case Operation::Gamma: {
-            constexpr gdouble gamma = 0.8;
-            opResult = vips_gamma(in, &out, gamma, NULL);
+            constexpr gdouble gamma = 2.4;
+            opResult = vips_gamma(in, &out, "exponent", gamma, NULL);
             break;
         }
 
