@@ -8,10 +8,7 @@
 
 namespace py = pybind11;
 
-void gamma_transform() {
-    std::string imageFile = "images/pexels-stijn-dijkstra-1306815-29988776.jpg";
-    std::string outptFile = "images/test_out.jpg";
-
+void gamma_transform(const std::string &imageFile, std::string outputFile, double exponent) {
     VipsImage *in;
     double mean;
     VipsImage *out;
@@ -32,19 +29,20 @@ void gamma_transform() {
     }
     spdlog::info("Mean pixel value = {:g}", mean);
 
-    constexpr gdouble gamma = 1.55;
-    int opResult = vips_gamma(in, &out, gamma, NULL);
+    spdlog::info("Applying gamma transform with exponent = {:g}", exponent);
+    gdouble gExponent = exponent;
+    int opResult = vips_gamma(in, &out, gExponent, NULL);
 
     if (opResult != 0 || out == nullptr) {
         vips_error_exit("Image operation failed.", NULL);
     }
 
     g_object_unref(in);
-    if (vips_image_write_to_file(out, outptFile.c_str(), NULL)) {
-        vips_error_exit("Failed to write image file: %s", outptFile.c_str(), NULL);
+    if (vips_image_write_to_file(out, outputFile.c_str(), NULL)) {
+        vips_error_exit("Failed to write image file: %s", outputFile.c_str(), NULL);
     }
     g_object_unref(out);
-    spdlog::info("Processed image written to: {}", outptFile);
+    spdlog::info("Processed image written to: {}", outputFile);
 }
 
 PYBIND11_MODULE(vips_py, m, py::mod_gil_not_used()) {

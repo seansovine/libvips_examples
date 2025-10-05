@@ -10,7 +10,7 @@ git submodule update --init --recursive
 
 # We build with bear to generate a compilation database for libvips.
 cd libvips
-bear -- meson setup build --reconfigure -Dcplusplus=true -Ddebug=true
+bear -- meson setup build --reconfigure -Dcplusplus=true -Ddebug=true --buildtype=debug
 bear -- meson compile -C build
 cd ..
 
@@ -25,6 +25,14 @@ cmake --build ./build/Debug --config Debug --target all "-j `nproc`"
 ```
 
 We may integrate the libvips build into the overall CMake build later.
+
+We've also found it useful to uncomment the line
+
+```c
+#define VIPS_DEBUG
+```
+
+in `operation.c` when tracing through runs of the vips code.
 
 ## Compilation database
 

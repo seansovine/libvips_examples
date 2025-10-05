@@ -21,7 +21,7 @@ c_test:
 cpp_test:
 	build/Debug/test-cpp-api
 
-pybuild:
+pybuild: build
 	@pip install --force-reinstall .
 
 pytest:
