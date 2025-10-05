@@ -6,4 +6,4 @@ part of our CMake project. This is not necessary, but it was
 helpful while debugging our setup. We may remove this later and
 just use the version built with libvips.
 
-The official documentation for `libvips/cplusplus` is in [README.md](./README.md).
+The official documentation for `libvips/cplusplus` is in [VIPS-README.md](./VIPS-README.md).
